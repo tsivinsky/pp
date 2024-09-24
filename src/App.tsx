@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import ListIcon from "./icons/list.svg?react";
 import { useDropzone } from "./useDropzone";
 import { clsx } from "clsx";
+import { Preset } from "./types";
+import toast from "react-hot-toast";
 
 const pickFile = async () => {
   return new Promise<File | null>((resolve, reject) => {
@@ -28,6 +30,7 @@ export default function App() {
   const [opacity, setOpacity] = useState(70);
   const [width, setWidth] = useState(2880);
   const [height, setHeight] = useState(1452);
+  const [presets, setPresets] = useState<Preset[]>([]);
 
   const dropzone = useDropzone((files) => {
     for (const item of files) {
@@ -64,6 +67,11 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const presets = JSON.parse(localStorage.getItem("presets") || "[]");
+    setPresets(presets);
+  }, []);
+
   const handleAddDesignImage = async () => {
     if (image) return;
 
@@ -77,6 +85,27 @@ export default function App() {
 
     setUrl(inputUrl);
     setInputUrl("");
+  };
+
+  const handleSelectPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const index = parseInt(e.target.value);
+    if (index === -1) return;
+
+    const preset = presets[index];
+    setWidth(preset[0]);
+    setHeight(preset[1]);
+  };
+
+  const handleAddPreset = () => {
+    if (width === 0 || height === 0) return; // supermaven said to add this. idk why but sure. thanks, supermaven :)
+
+    if (presets.some((preset) => preset[0] === width && preset[1] === height)) {
+      return toast.error("This preset already exists");
+    }
+
+    const newPresets = [...presets, [width, height]] as Preset[];
+    localStorage.setItem("presets", JSON.stringify(newPresets));
+    setPresets(newPresets);
   };
 
   return (
@@ -93,6 +122,14 @@ export default function App() {
             sideOffset={10}
             className="bg-neutral-100 rounded-xl shadow-lg p-4 flex flex-col gap-4"
           >
+            <select onChange={handleSelectPreset}>
+              <option value="-1">Presets</option>
+              {presets.map((preset, i) => (
+                <option key={i} value={i}>
+                  {preset[0]}x{preset[1]}
+                </option>
+              ))}
+            </select>
             <div className="flex flex-col">
               <label htmlFor="width">Width</label>
               <input
@@ -111,6 +148,12 @@ export default function App() {
                 onChange={(e) => setHeight(parseInt(e.target.value || "1080"))}
               />
             </div>
+            <button
+              className="border py-2 rounded-md bg-neutral-300 shadow-md"
+              onClick={handleAddPreset}
+            >
+              Add as a Preset
+            </button>
             <div className="flex flex-col">
               <label htmlFor="opacity">Opacity</label>
               <div className="flex items-center gap-1">
