@@ -1,6 +1,7 @@
 import * as Popover from "@radix-ui/react-popover";
 import React, { useEffect, useState } from "react";
 import ListIcon from "./icons/list.svg?react";
+import CloseIcon from "./icons/close.svg?react";
 import { useDropzone } from "./useDropzone";
 import { clsx } from "clsx";
 import { Preset } from "./types";
@@ -173,7 +174,7 @@ export default function App() {
       </Popover.Root>
       <div
         className={clsx(
-          "relative border-4 border-neutral-800 rounded-xl bg-neutral-100 p-1 overflow-hidden shadow-lg grid place-items-center",
+          "relative border-4 border-neutral-800 rounded-xl bg-neutral-100 p-1 shadow-lg grid place-items-center",
           {
             "!border-blue-500 !bg-blue-50": dropzone.isActive,
           }
@@ -181,6 +182,14 @@ export default function App() {
         style={{ width: width + 8, height: height + 8 }}
         onClick={handleAddDesignImage}
       >
+        {image && (
+          <button
+            className="absolute -top-12 -right-12 z-10"
+            onClick={() => setImage(undefined)}
+          >
+            <CloseIcon width={52} height={52} />
+          </button>
+        )}
         {image && <img src={image} alt="" width={width} height={height} />}
         {image && url && (
           <iframe
