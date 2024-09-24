@@ -8,7 +8,7 @@ const pickFile = async () => {
       const input = document.createElement("input");
       input.type = "file";
       input.onchange = (e) => {
-        // @ts-ignore
+        // @ts-expect-error some nonsense
         const file = e.target.files[0];
         resolve(file);
       };
