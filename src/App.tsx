@@ -175,7 +175,7 @@ export default function App() {
         className={clsx(
           "relative border-4 border-neutral-800 rounded-xl bg-neutral-100 p-1 overflow-hidden shadow-lg grid place-items-center",
           {
-            "border-blue-500 bg-blue-50": dropzone.isActive,
+            "!border-blue-500 !bg-blue-50": dropzone.isActive,
           }
         )}
         style={{ width: width + 8, height: height + 8 }}
