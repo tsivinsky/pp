@@ -1,6 +1,8 @@
 import * as Popover from "@radix-ui/react-popover";
-import { MouseEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ListIcon from "./icons/list.svg?react";
+import { useDropzone } from "./useDropzone";
+import { clsx } from "clsx";
 
 const pickFile = async () => {
   return new Promise<File | null>((resolve, reject) => {
@@ -27,6 +29,18 @@ export default function App() {
   const [width, setWidth] = useState(2880);
   const [height, setHeight] = useState(1452);
 
+  const dropzone = useDropzone((files) => {
+    for (const item of files) {
+      if (item.kind === "file" && item.type.startsWith("image")) {
+        const file = item.getAsFile();
+        if (file) {
+          setImage(URL.createObjectURL(file));
+          return;
+        }
+      }
+    }
+  });
+
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     const width = query.get("w");
@@ -51,12 +65,14 @@ export default function App() {
   }, []);
 
   const handleAddDesignImage = async () => {
+    if (image) return;
+
     const file = await pickFile();
     if (!file) return;
     setImage(URL.createObjectURL(file));
   };
 
-  const handleAddUrl = (e: MouseEvent<HTMLButtonElement>) => {
+  const handleAddUrl = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     setUrl(inputUrl);
@@ -112,9 +128,18 @@ export default function App() {
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
-      {image && url && (
-        <div className="relative" style={{ width, height }}>
-          <img src={image} alt="" width={width} height={height} />
+      <div
+        className={clsx(
+          "relative border-4 border-neutral-800 rounded-xl bg-neutral-100 p-1 overflow-hidden shadow-lg grid place-items-center",
+          {
+            "border-blue-500 bg-blue-50": dropzone.isActive,
+          }
+        )}
+        style={{ width: width + 8, height: height + 8 }}
+        onClick={handleAddDesignImage}
+      >
+        {image && <img src={image} alt="" width={width} height={height} />}
+        {image && url && (
           <iframe
             src={url}
             width={width}
@@ -123,11 +148,16 @@ export default function App() {
             className="absolute inset-0"
             style={{ opacity: opacity / 100 }}
           />
-        </div>
-      )}
-      {!image && (
-        <button onClick={handleAddDesignImage}>Add design image</button>
-      )}
+        )}
+        {!image && (
+          <div
+            className="w-full h-full grid place-items-center cursor-pointer"
+            {...dropzone.handlers}
+          >
+            <p className="text-5xl">Add image to compare to</p>
+          </div>
+        )}
+      </div>
       {!url && (
         <form>
           <input
