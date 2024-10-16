@@ -73,6 +73,16 @@ export default function App() {
     setPresets(presets);
   }, []);
 
+  useEffect(() => {
+    window.addEventListener("paste", (e) => {
+      const file = e.clipboardData?.files.item(0);
+      if (!file) return;
+
+      const url = URL.createObjectURL(file);
+      setImage(url);
+    });
+  }, []);
+
   const handleAddDesignImage = async () => {
     if (image) return;
 
